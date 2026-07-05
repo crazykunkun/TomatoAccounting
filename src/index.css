@@ -1,0 +1,547 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+#root {
+  height: 100vh;
+}
+
+/* ===== 页面通用 ===== */
+.page {
+  padding: 16px;
+  min-height: 100%;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.page-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.header-month {
+  font-size: 14px;
+  color: #999;
+}
+
+/* ===== 总览页 ===== */
+.stats-cards {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  flex: 1;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+  color: #fff;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.stat-card:last-child {
+  background: linear-gradient(135deg, #4dabf7, #74c0fc);
+}
+
+.stat-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 4px 0;
+}
+
+.stat-value.primary {
+  font-size: 28px;
+}
+
+.stat-sub {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.stat-sub.up {
+  color: #ffe0e0;
+}
+
+.stat-sub.down {
+  color: #b8f5c0;
+}
+
+/* ===== 分类排行 ===== */
+.section {
+  margin-bottom: 20px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.section-more {
+  font-size: 13px;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-weight: 400;
+}
+
+.category-rank {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.rank-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #666;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rank-item:first-child .rank-num {
+  background: #ff6b6b;
+  color: #fff;
+}
+
+.rank-item:nth-child(2) .rank-num {
+  background: #ffa94d;
+  color: #fff;
+}
+
+.rank-item:nth-child(3) .rank-num {
+  background: #ffd43b;
+  color: #fff;
+}
+
+.rank-name {
+  width: 90px;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.rank-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.rank-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b6b, #ffa94d);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.rank-amount {
+  width: 70px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  flex-shrink: 0;
+}
+
+/* ===== 最近账单 ===== */
+.recent-list {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 4px 16px;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.recent-item:last-child {
+  border-bottom: none;
+}
+
+.recent-cat {
+  flex: 1;
+  font-size: 14px;
+}
+
+.recent-date {
+  font-size: 12px;
+  color: #999;
+  margin-right: 12px;
+}
+
+.recent-amount {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ff6b6b;
+}
+
+.empty-hint {
+  text-align: center;
+  color: #999;
+  padding: 32px 16px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+/* ===== 记账页 ===== */
+.amount-display {
+  text-align: center;
+  padding: 24px 0 16px;
+  position: relative;
+}
+
+.currency {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin-right: 4px;
+}
+
+.amount-value {
+  font-size: 40px;
+  font-weight: 700;
+  color: #333;
+}
+
+.amount-clear {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #999;
+  font-size: 12px;
+  text-align: center;
+  line-height: 24px;
+  cursor: pointer;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+}
+
+.form-label {
+  font-size: 15px;
+  color: #666;
+  width: 50px;
+  flex-shrink: 0;
+}
+
+.form-value {
+  flex: 1;
+  font-size: 15px;
+  text-align: right;
+  color: #333;
+}
+
+.form-arrow {
+  font-size: 18px;
+  color: #ccc;
+  margin-left: 4px;
+}
+
+.submit-area {
+  padding: 16px 0 8px;
+}
+
+/* ===== 数字键盘 ===== */
+.num-keyboard {
+  position: fixed;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: #f8f9fa;
+  padding: 4px;
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.key-btn {
+  flex: 1;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 500;
+  background: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.key-btn:active {
+  background: #e9ecef;
+}
+
+.key-func {
+  background: #e9ecef;
+  font-size: 18px;
+  color: #666;
+}
+
+/* ===== 分类选择弹窗 ===== */
+.cat-picker {
+  display: flex;
+  max-height: 360px;
+  overflow: hidden;
+}
+
+.cat1-list {
+  width: 120px;
+  overflow-y: auto;
+  border-right: 1px solid #f0f0f0;
+  padding-right: 8px;
+}
+
+.cat1-item {
+  padding: 10px 8px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-bottom: 2px;
+  transition: background 0.15s;
+}
+
+.cat1-item:hover {
+  background: #f5f5f5;
+}
+
+.cat1-item.active {
+  background: #fff2f0;
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+.cat2-list {
+  flex: 1;
+  overflow-y: auto;
+  padding-left: 8px;
+}
+
+.cat2-item {
+  padding: 10px 8px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-bottom: 2px;
+  transition: background 0.15s;
+}
+
+.cat2-item:hover {
+  background: #f5f5f5;
+}
+
+.cat2-item.active {
+  background: #fff2f0;
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+/* ===== 账单列表 ===== */
+.bill-list {
+  margin-top: 8px;
+}
+
+.bill-group {
+  margin-bottom: 20px;
+}
+
+.bill-date-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.date-total {
+  font-size: 13px;
+  color: #ff6b6b;
+}
+
+.bill-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #fafafa;
+  cursor: pointer;
+}
+
+.bill-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.bill-cat {
+  font-size: 14px;
+  color: #333;
+}
+
+.bill-note {
+  font-size: 12px;
+  color: #999;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bill-amount {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ff6b6b;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+/* ===== 统计页 ===== */
+.period-switch {
+  margin-bottom: 16px;
+}
+
+.total-expense-label {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.total-expense-label strong {
+  color: #ff6b6b;
+  font-size: 18px;
+  margin-left: 4px;
+}
+
+.chart-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 8px;
+  margin-bottom: 16px;
+}
+
+.rank-list {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 8px 16px;
+}
+
+.rank-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.rank-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.rank-list-name {
+  flex: 1;
+  font-size: 14px;
+}
+
+.rank-list-pct {
+  font-size: 12px;
+  color: #999;
+  width: 40px;
+  text-align: right;
+}
+
+.rank-list-amount {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  width: 80px;
+  text-align: right;
+}
+
+/* ===== 设置页 ===== */
+.settings-section {
+  margin-bottom: 20px;
+}
+
+/* ===== 空状态 ===== */
+.empty-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.empty-page p {
+  font-size: 15px;
+}
+
+/* ===== 滚动条 ===== */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}

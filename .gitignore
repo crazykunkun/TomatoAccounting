@@ -1,0 +1,17 @@
+# 第三方依赖（可用 npm install 重新下载）
+node_modules/
+
+# 构建产物（可用 npm run build 重新生成）
+dist/
+dist-electron/
+
+# Claude Code 本地配置
+.claude/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 环境变量（可能含密钥）
+.env
+.env.local
