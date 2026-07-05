@@ -1,6 +1,7 @@
 import type { Category1 } from '../types'
 
-export const categories: Category1[] = [
+// 预设分类（仅用于首次初始化，之后用户数据存数据库）
+export const defaultCategories: Category1[] = [
   {
     key: 'food',
     name: '食品餐饮',
@@ -144,28 +145,40 @@ export const categories: Category1[] = [
   },
 ]
 
+// 可选 emoji 图标库
+export const emojiOptions = [
+  '🍜', '🚗', '🏠', '🛒', '🎮', '💊', '📚', '🎁', '📱', '💰', '👶', '📦',
+  '❤️', '💻', '🎵', '🏥', '🎓', '✈️', '🐱', '🎯', '☕', '👗', '🏋️', '🎬',
+  '💡', '🌍', '🔧', '📷', '🍺', '🎂', '🏀', '🚲',
+]
+
+// 生成唯一 key（时间戳 + 随机数）
+export function generateKey(): string {
+  return `custom_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+}
+
 // 根据 key 查找一级分类
-export function getCategory1(key: string): Category1 | undefined {
-  return categories.find((c) => c.key === key)
+export function getCategory1(key: string, cats: Category1[]): Category1 | undefined {
+  return cats.find((c) => c.key === key)
 }
 
 // 根据 key 查找分类名称
-export function getCategoryName(cat1Key: string, cat2Key: string): string {
-  const cat1 = getCategory1(cat1Key)
+export function getCategoryName(cat1Key: string, cat2Key: string, cats: Category1[]): string {
+  const cat1 = getCategory1(cat1Key, cats)
   if (!cat1) return '未知分类'
   const cat2 = cat1.children.find((c) => c.key === cat2Key)
   return cat2 ? `${cat1.icon} ${cat1.name}/${cat2.name}` : `${cat1.icon} ${cat1.name}`
 }
 
 // 获取一级分类名称（含图标）
-export function getCategory1Name(key: string): string {
-  const cat = getCategory1(key)
+export function getCategory1Name(key: string, cats: Category1[]): string {
+  const cat = getCategory1(key, cats)
   return cat ? `${cat.icon} ${cat.name}` : '未知分类'
 }
 
 // 获取二级分类名称
-export function getCategory2Name(cat1Key: string, cat2Key: string): string {
-  const cat1 = getCategory1(cat1Key)
+export function getCategory2Name(cat1Key: string, cat2Key: string, cats: Category1[]): string {
+  const cat1 = getCategory1(cat1Key, cats)
   if (!cat1) return '未知'
   const cat2 = cat1.children.find((c) => c.key === cat2Key)
   return cat2 ? cat2.name : '未知'

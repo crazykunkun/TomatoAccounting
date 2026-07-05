@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from './useNavigate'
-import { getExpensesByMonth, getMonthStatsByCategory } from '../db'
+import { getExpensesByMonth, getMonthStatsByCategory, loadCategories } from '../db'
 import { getCategory1Name } from '../data/categories'
-import type { Expense } from '../types'
+import type { Expense, Category1 } from '../types'
 import dayjs from 'dayjs'
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
 
 function Dashboard({ onNavigate }: Props) {
   const navigate = useNavigate(onNavigate)
+  const [categories, setCategories] = useState<Category1[]>([])
   const [monthTotal, setMonthTotal] = useState(0)
   const [recordCount, setRecordCount] = useState(0)
   const [recentExpenses, setRecentExpenses] = useState<Expense[]>([])
@@ -22,6 +23,8 @@ function Dashboard({ onNavigate }: Props) {
   }, [])
 
   const loadData = async () => {
+    const cats = await loadCategories()
+    setCategories(cats)
     const now = dayjs()
     const year = now.year()
     const month = now.month() + 1
@@ -91,7 +94,7 @@ function Dashboard({ onNavigate }: Props) {
               return (
                 <div key={item.key} className="rank-item">
                   <span className="rank-num">{idx + 1}</span>
-                  <span className="rank-name">{getCategory1Name(item.key)}</span>
+                  <span className="rank-name">{getCategory1Name(item.key, categories)}</span>
                   <span className="rank-bar-wrap">
                     <span className="rank-bar" style={{ width: `${pct}%` }} />
                   </span>
@@ -113,7 +116,7 @@ function Dashboard({ onNavigate }: Props) {
           <div className="recent-list">
             {recentExpenses.map((e) => (
               <div key={e.id} className="recent-item">
-                <span className="recent-cat">{getCategory1Name(e.category1)}</span>
+                <span className="recent-cat">{getCategory1Name(e.category1, categories)}</span>
                 <span className="recent-date">{e.date.slice(5)}</span>
                 <span className="recent-amount">¥{e.amount.toFixed(2)}</span>
               </div>

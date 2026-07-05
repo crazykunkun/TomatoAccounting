@@ -1,19 +1,25 @@
 import { useState, useEffect } from 'react'
 import ReactECharts from 'echarts-for-react'
 import { Segmented } from 'antd'
-import { getExpensesByMonth, getMonthStatsByCategory } from '../db'
+import { getMonthStatsByCategory, loadCategories } from '../db'
 import { getCategory1Name } from '../data/categories'
+import type { Category1 } from '../types'
 import dayjs from 'dayjs'
 
 function Statistics() {
   const [period, setPeriod] = useState<string>('本月')
+  const [categories, setCategories] = useState<Category1[]>([])
   const [pieData, setPieData] = useState<{ name: string; value: number }[]>([])
   const [rankData, setRankData] = useState<{ key: string; total: number; pct: string }[]>([])
   const [totalExpense, setTotalExpense] = useState(0)
 
   useEffect(() => {
+    loadCategories().then(setCategories)
+  }, [])
+
+  useEffect(() => {
     loadData()
-  }, [period])
+  }, [period, categories])
 
   const loadData = async () => {
     const now = dayjs()
@@ -33,12 +39,11 @@ function Statistics() {
     const data = stats
       .filter((s) => s.total > 0)
       .map((s) => ({
-        name: getCategory1Name(s.key),
+        name: getCategory1Name(s.key, categories),
         value: Math.round(s.total * 100) / 100,
       }))
     setPieData(data)
 
-    const maxTotal = stats[0]?.total || 1
     setRankData(
       stats.map((s) => ({
         key: s.key,
@@ -132,7 +137,7 @@ function Statistics() {
                     className="rank-dot"
                     style={{ background: getColor(idx) }}
                   />
-                  <span className="rank-list-name">{getCategory1Name(item.key)}</span>
+                  <span className="rank-list-name">{getCategory1Name(item.key, categories)}</span>
                   <span className="rank-list-pct">{item.pct}%</span>
                   <span className="rank-list-amount">¥{item.total.toFixed(2)}</span>
                 </div>

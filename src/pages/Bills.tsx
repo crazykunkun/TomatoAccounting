@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Modal, message } from 'antd'
-import { getExpenses, deleteExpense } from '../db'
+import { getExpenses, deleteExpense, loadCategories } from '../db'
 import { getCategory1Name, getCategory2Name } from '../data/categories'
-import type { Expense } from '../types'
+import type { Expense, Category1 } from '../types'
 import dayjs from 'dayjs'
 
 function Bills() {
   const [expenses, setExpenses] = useState<Expense[]>([])
+  const [categories, setCategories] = useState<Category1[]>([])
   const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null)
 
   useEffect(() => {
@@ -14,8 +15,9 @@ function Bills() {
   }, [])
 
   const loadData = async () => {
-    const data = await getExpenses()
+    const [data, cats] = await Promise.all([getExpenses(), loadCategories()])
     setExpenses(data)
+    setCategories(cats)
   }
 
   // 按日期分组
@@ -87,7 +89,7 @@ function Bills() {
                 >
                   <div className="bill-info">
                     <div className="bill-cat">
-                      {getCategory1Name(e.category1)} / {getCategory2Name(e.category1, e.category2)}
+                      {getCategory1Name(e.category1, categories)} / {getCategory2Name(e.category1, e.category2, categories)}
                     </div>
                     {e.note && <div className="bill-note">{e.note}</div>}
                   </div>
@@ -120,7 +122,7 @@ function Bills() {
             确定要删除这笔记录吗？
             <br />
             <strong>
-              {getCategory1Name(deleteTarget.category1)} ¥{deleteTarget.amount.toFixed(2)}
+              {getCategory1Name(deleteTarget.category1, categories)} ¥{deleteTarget.amount.toFixed(2)}
             </strong>
           </p>
         )}

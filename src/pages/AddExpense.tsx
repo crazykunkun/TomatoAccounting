@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import { Button, Input, DatePicker, Modal, message } from 'antd'
+import { useState, useEffect } from 'react'
+import { Button, Input, DatePicker, Modal, message, Spin } from 'antd'
 import dayjs, { type Dayjs } from 'dayjs'
-import { categories, getCategory1Name, getCategory2Name } from '../data/categories'
-import { addExpense } from '../db'
-import type { Category2 } from '../types'
+import { getCategory1Name, getCategory2Name } from '../data/categories'
+import { addExpense, loadCategories } from '../db'
+import type { Category1, Category2 } from '../types'
 
 interface Props {
   onSuccess: () => void
@@ -16,6 +16,19 @@ function AddExpense({ onSuccess }: Props) {
   const [date, setDate] = useState<Dayjs>(dayjs())
   const [note, setNote] = useState('')
   const [showCatPicker, setShowCatPicker] = useState(false)
+  const [categories, setCategories] = useState<Category1[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadCategories().then((cats) => {
+      setCategories(cats)
+      if (cats.length > 0) {
+        setCat1Key(cats[0].key)
+        setCat2Key(cats[0].children[0]?.key || '')
+      }
+      setLoading(false)
+    })
+  }, [])
 
   // 数字键盘按键
   const handleKeyPress = (key: string) => {
@@ -92,6 +105,14 @@ function AddExpense({ onSuccess }: Props) {
     ['.', '0', 'backspace'],
   ]
 
+  if (loading) {
+    return (
+      <div className="page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
+        <Spin size="large" />
+      </div>
+    )
+  }
+
   return (
     <div className="page">
       <div className="page-header">
@@ -109,7 +130,7 @@ function AddExpense({ onSuccess }: Props) {
       <div className="form-row" onClick={() => setShowCatPicker(true)}>
         <span className="form-label">分类</span>
         <span className="form-value">
-          {getCategory1Name(cat1Key)} / {cat2Valid ? getCategory2Name(cat1Key, cat2Key) : '选择'}
+          {getCategory1Name(cat1Key, categories)} / {cat2Valid ? getCategory2Name(cat1Key, cat2Key, categories) : '选择'}
         </span>
         <span className="form-arrow">›</span>
       </div>

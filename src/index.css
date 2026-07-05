@@ -540,6 +540,92 @@ body {
   font-size: 15px;
 }
 
+/* ===== 分类管理 ===== */
+.cat-mgmt-list {
+  background: #f8f9fa;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cat-mgmt-group {
+  border-bottom: 1px solid #eee;
+}
+
+.cat-mgmt-group:last-child {
+  border-bottom: none;
+}
+
+.cat-mgmt-cat1 {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  gap: 8px;
+  transition: background 0.15s;
+}
+
+.cat-mgmt-cat1:hover {
+  background: #f0f0f0;
+}
+
+.cat-mgmt-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.cat-mgmt-name {
+  font-size: 14px;
+  font-weight: 500;
+  flex: 1;
+}
+
+.cat-mgmt-count {
+  font-size: 12px;
+  color: #999;
+}
+
+.cat-mgmt-arrow {
+  font-size: 12px;
+  color: #ccc;
+  width: 16px;
+  text-align: center;
+}
+
+.cat-mgmt-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.cat-mgmt-cat2-list {
+  background: #fff;
+  padding: 0 16px 8px 40px;
+}
+
+.cat-mgmt-cat2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.cat-mgmt-cat2:last-child {
+  border-bottom: none;
+}
+
+.cat-mgmt-cat2-name {
+  font-size: 13px;
+  color: #555;
+}
+
+.cat-mgmt-empty {
+  padding: 12px 0;
+  font-size: 13px;
+  color: #ccc;
+  text-align: center;
+}
+
 /* ===== 滚动条 ===== */
 ::-webkit-scrollbar {
   width: 0;
