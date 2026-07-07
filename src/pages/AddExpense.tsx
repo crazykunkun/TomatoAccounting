@@ -20,14 +20,20 @@ function AddExpense({ onSuccess }: Props) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadCategories().then((cats) => {
-      setCategories(cats)
-      if (cats.length > 0) {
-        setCat1Key(cats[0].key)
-        setCat2Key(cats[0].children[0]?.key || '')
-      }
-      setLoading(false)
-    })
+    loadCategories()
+      .then((cats) => {
+        setCategories(cats)
+        if (cats.length > 0) {
+          setCat1Key(cats[0].key)
+          setCat2Key(cats[0].children[0]?.key || '')
+        }
+      })
+      .catch(() => {
+        message.error('加载分类失败，请刷新页面重试')
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [])
 
   // 数字键盘按键

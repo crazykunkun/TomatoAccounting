@@ -1,10 +1,17 @@
 import { useState, useEffect } from 'react'
 import ReactECharts from 'echarts-for-react'
-import { Segmented } from 'antd'
+import { Segmented, message } from 'antd'
 import { getMonthStatsByCategory, loadCategories } from '../db'
 import { getCategory1Name } from '../data/categories'
 import type { Category1 } from '../types'
 import dayjs from 'dayjs'
+
+// 分类图表色板（12 色）
+const CHART_COLORS = [
+  '#ff6b6b', '#ffa94d', '#ffd43b', '#69db7c', '#4dabf7',
+  '#da77f2', '#20c997', '#f06595', '#74c0fc', '#fcc419',
+  '#845ef7', '#5c7cfa',
+]
 
 function Statistics() {
   const [period, setPeriod] = useState<string>('本月')
@@ -13,11 +20,18 @@ function Statistics() {
   const [rankData, setRankData] = useState<{ key: string; total: number; pct: string }[]>([])
   const [totalExpense, setTotalExpense] = useState(0)
 
+  // 首次挂载时加载分类（只加载一次）
   useEffect(() => {
-    loadCategories().then(setCategories)
+    loadCategories()
+      .then(setCategories)
+      .catch(() => {
+        message.error('加载分类失败，请刷新页面重试')
+      })
   }, [])
 
+  // period 或 categories 变化时加载统计数据
   useEffect(() => {
+    if (categories.length === 0) return  // 分类未就绪时不请求数据
     loadData()
   }, [period, categories])
 
@@ -82,21 +96,12 @@ function Statistics() {
         data: pieData,
       },
     ],
-    color: [
-      '#ff6b6b', '#ffa94d', '#ffd43b', '#69db7c', '#4dabf7',
-      '#da77f2', '#20c997', '#f06595', '#74c0fc', '#fcc419',
-      '#845ef7', '#5c7cfa',
-    ],
+    color: CHART_COLORS,
   }
 
   // 为每个一级分类获取对应颜色
   const getColor = (idx: number) => {
-    const colors = [
-      '#ff6b6b', '#ffa94d', '#ffd43b', '#69db7c', '#4dabf7',
-      '#da77f2', '#20c997', '#f06595', '#74c0fc', '#fcc419',
-      '#845ef7', '#5c7cfa',
-    ]
-    return colors[idx % colors.length]
+    return CHART_COLORS[idx % CHART_COLORS.length]
   }
 
   return (

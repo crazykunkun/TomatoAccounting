@@ -22,18 +22,27 @@ export const db = new TomatoDB()
 
 // ========== 分类管理 ==========
 
+// 内存缓存，避免重复读取 IndexedDB
+let categoriesCache: Category1[] | null = null
+
 // 加载分类（首次自动用预设数据初始化）
 export async function loadCategories(): Promise<Category1[]> {
+  // 有缓存直接返回，避免重复读取 IndexedDB
+  if (categoriesCache) return categoriesCache
+
   const record = await db.settings.get('categories')
   if (!record) {
     // 首次使用，写入预设分类（标记为预设，不可删除）
     const seeded = markPreset(defaultCategories)
     await db.settings.put({ key: 'categories', value: seeded })
+    categoriesCache = seeded
     return seeded
   }
   // 迁移旧数据：没有 isPreset 标记的版本，自动补上
   const needsMigration = record.value.some(
-    (cat: Category1) => cat.isPreset === undefined
+    (cat: Category1) =>
+      cat.isPreset === undefined ||
+      cat.children.some((child) => child.isPreset === undefined)
   )
   if (needsMigration) {
     const migrated = record.value.map((cat: Category1) => {
@@ -50,13 +59,20 @@ export async function loadCategories(): Promise<Category1[]> {
       }
     })
     await db.settings.put({ key: 'categories', value: migrated })
+    categoriesCache = migrated
     return migrated
   }
+  categoriesCache = record.value
   return record.value
 }
 
+// 使分类缓存失效（分类变更后调用）
+export function invalidateCategoriesCache(): void {
+  categoriesCache = null
+}
+
 // 给默认分类打上预设标记
-function markPreset(cats: Category1[]): Category1[] {
+export function markPreset(cats: Category1[]): Category1[] {
   return cats.map((cat) => ({
     ...cat,
     isPreset: true,
@@ -67,6 +83,7 @@ function markPreset(cats: Category1[]): Category1[] {
 // 保存分类
 export async function saveCategories(categories: Category1[]): Promise<void> {
   await db.settings.put({ key: 'categories', value: categories })
+  categoriesCache = categories
 }
 
 // ========== 支出记录 ==========

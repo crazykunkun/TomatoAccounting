@@ -1,9 +1,36 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo } from 'react'
 import { List, Modal, message, Button, Input } from 'antd'
 import { DeleteOutlined, ExportOutlined, PlusOutlined, EditOutlined, ReloadOutlined } from '@ant-design/icons'
-import { db, loadCategories, saveCategories, countExpensesByCategory1, countExpensesByCategory2 } from '../db'
+import { db, loadCategories, saveCategories, countExpensesByCategory1, countExpensesByCategory2, markPreset } from '../db'
 import { defaultCategories, emojiOptions, generateKey } from '../data/categories'
 import type { Category1, Category2 } from '../types'
+
+// emoji 图标选择器（memo 避免输入时重新渲染）
+const EmojiPicker = memo<{ selected: string; onChange: (emoji: string) => void }>(
+  ({ selected, onChange }) => (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 8, fontSize: 13, color: '#666' }}>选择图标</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        {emojiOptions.map((emoji) => (
+          <span
+            key={emoji}
+            onClick={() => onChange(emoji)}
+            style={{
+              fontSize: 22,
+              padding: 4,
+              cursor: 'pointer',
+              borderRadius: 6,
+              background: selected === emoji ? '#fff2f0' : 'transparent',
+              border: selected === emoji ? '2px solid #ff6b6b' : '2px solid transparent',
+            }}
+          >
+            {emoji}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+)
 
 function Settings() {
   const [count, setCount] = useState(0)
@@ -82,72 +109,70 @@ function Settings() {
       }
     }
 
-    await saveCategories(newCats)
-    setCategories(newCats)
-    setEditModal(null)
-    message.success(mode === 'add' ? '已添加' : '已修改')
+    try {
+      await saveCategories(newCats)
+      setCategories(newCats)
+      setEditModal(null)
+      message.success(mode === 'add' ? '已添加' : '已修改')
+    } catch {
+      message.error('保存失败，请重试')
+    }
+  }
+
+  // 通用的删除确认 + 执行逻辑
+  const confirmDelete = (
+    title: string,
+    content: string,
+    doDelete: () => Promise<Category1[]>
+  ) => {
+    Modal.confirm({
+      title,
+      content,
+      okText: '确认删除',
+      cancelText: '取消',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          const newCats = await doDelete()
+          await saveCategories(newCats)
+          setCategories(newCats)
+          message.success('已删除')
+        } catch {
+          message.error('删除失败，请重试')
+        }
+      },
+    })
   }
 
   // 删除一级分类
   const handleDeleteCat1 = async (cat: Category1) => {
     const refCount = await countExpensesByCategory1(cat.key)
-    if (refCount > 0) {
-      Modal.confirm({
-        title: '该分类下有记账记录',
-        content: `"${cat.name}" 下共有 ${refCount} 条记账记录。删除后这些记录的的分类将显示为"未知分类"，确定删除吗？`,
-        okText: '确认删除',
-        cancelText: '取消',
-        okButtonProps: { danger: true },
-        onOk: async () => {
-          const newCats = categories.filter((c) => c.key !== cat.key)
-          await saveCategories(newCats)
-          setCategories(newCats)
-          if (expandedKey === cat.key) setExpandedKey(null)
-          message.success('已删除')
-        },
-      })
-    } else {
+    const title = refCount > 0 ? '该分类下有记账记录' : '确认删除'
+    const content = refCount > 0
+      ? `"${cat.name}" 下共有 ${refCount} 条记账记录。删除后这些记录的分类将显示为"未知分类"，确定删除吗？`
+      : `确定删除一级分类"${cat.name}"及其所有子分类吗？此操作不可撤销。`
+    confirmDelete(title, content, async () => {
       const newCats = categories.filter((c) => c.key !== cat.key)
-      await saveCategories(newCats)
-      setCategories(newCats)
       if (expandedKey === cat.key) setExpandedKey(null)
-      message.success('已删除')
-    }
+      return newCats
+    })
   }
 
   // 删除二级分类
   const handleDeleteCat2 = async (parentKey: string, child: Category2) => {
     const refCount = await countExpensesByCategory2(parentKey, child.key)
-    if (refCount > 0) {
-      Modal.confirm({
-        title: '该分类下有记账记录',
-        content: `"${child.name}" 下共有 ${refCount} 条记账记录。删除后这些记录的分类将显示为"未知分类"，确定删除吗？`,
-        okText: '确认删除',
-        cancelText: '取消',
-        okButtonProps: { danger: true },
-        onOk: async () => {
-          const newCats = categories.map((c) => {
-            if (c.key === parentKey) {
-              return { ...c, children: c.children.filter((s) => s.key !== child.key) }
-            }
-            return c
-          })
-          await saveCategories(newCats)
-          setCategories(newCats)
-          message.success('已删除')
-        },
-      })
-    } else {
-      const newCats = categories.map((c) => {
+    const title = refCount > 0 ? '该分类下有记账记录' : '确认删除'
+    const content = refCount > 0
+      ? `"${child.name}" 下共有 ${refCount} 条记账记录。删除后这些记录的分类将显示为"未知"，确定删除吗？`
+      : `确定删除子分类"${child.name}"吗？此操作不可撤销。`
+    confirmDelete(title, content, async () => {
+      return categories.map((c) => {
         if (c.key === parentKey) {
           return { ...c, children: c.children.filter((s) => s.key !== child.key) }
         }
         return c
       })
-      await saveCategories(newCats)
-      setCategories(newCats)
-      message.success('已删除')
-    }
+    })
   }
 
   // 恢复默认分类
@@ -158,11 +183,7 @@ function Settings() {
       okText: '确认恢复',
       cancelText: '取消',
       onOk: async () => {
-        const restored = defaultCategories.map((cat) => ({
-          ...cat,
-          isPreset: true,
-          children: cat.children.map((child) => ({ ...child, isPreset: true })),
-        }))
+        const restored = markPreset(defaultCategories)
         await saveCategories(restored)
         setCategories(restored)
         setExpandedKey(null)
@@ -377,27 +398,10 @@ function Settings() {
         {editModal && (
           <div style={{ padding: '8px 0' }}>
             {editModal.type === 'cat1' && (
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ marginBottom: 8, fontSize: 13, color: '#666' }}>选择图标</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {emojiOptions.map((emoji) => (
-                    <span
-                      key={emoji}
-                      onClick={() => setEditModal({ ...editModal, icon: emoji })}
-                      style={{
-                        fontSize: 22,
-                        padding: 4,
-                        cursor: 'pointer',
-                        borderRadius: 6,
-                        background: editModal.icon === emoji ? '#fff2f0' : 'transparent',
-                        border: editModal.icon === emoji ? '2px solid #ff6b6b' : '2px solid transparent',
-                      }}
-                    >
-                      {emoji}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              <EmojiPicker
+                selected={editModal.icon}
+                onChange={(emoji) => setEditModal({ ...editModal, icon: emoji })}
+              />
             )}
             <div style={{ marginBottom: 8, fontSize: 13, color: '#666' }}>分类名称</div>
             <Input
