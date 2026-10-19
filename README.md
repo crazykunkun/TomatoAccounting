@@ -42,13 +42,6 @@ npm run dev
 # 桌面模式（Electron 独立窗口）
 npm run dev:electron
 ```
-
-> ⚠️ 国内用户如果 `npm install` 超时，可以先设置 GitHub 代理：
-> ```bash
-> export http_proxy="http://127.0.0.1:7897"
-> export https_proxy="http://127.0.0.1:7897"
-> ```
-
 ### 打包
 
 ```bash
